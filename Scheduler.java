@@ -100,7 +100,7 @@ public class Scheduler {
     }
 
     private void runScheduler() {
-        // Your existing code for running the scheduler
+        // running the scheduler
         try {
             PrintWriter writer = new PrintWriter(new FileWriter("C:\\Users\\wejoud\\Desktop\\os\\process_report.txt"));
             StringBuilder schedulingOrder = new StringBuilder("Scheduling Order: [");

@@ -34,12 +34,51 @@ public class Scheduler {
         Scanner scanner = new Scanner(System.in);
         Scheduler scheduler = new Scheduler();
 
+        System.out.println("Welcome to the Scheduler!");
+        int choice;
+        do {
+            choice = MainMenu(scanner);
+            switch (choice) {
+                case 1:
+                    // Add process information
+                    scheduler.addProcess(scanner);
+                    break;
+
+                case 2:
+                    // Report detailed information about each process and different scheduling criteria
+                    scheduler.runScheduler();
+                    break;
+
+                case 3:
+                //Exit Program
+                    System.out.println("Goodbye! Program Exited");
+                    break;
+
+                default:
+                    System.out.println("Invalid Choice, Please Try Again.");
+            }
+            System.out.println("\n\n");
+        } while (choice != 3);
+    }
+
+    public static int MainMenu(Scanner scanner) {
+        System.out.println("Please choose an option:");
+        System.out.println("1. Enter process' information.");
+        System.out.println("2. Report detailed information about each process and different scheduling criteria.");
+        System.out.println("3. Exit the program");
+        System.out.print("\nEnter your choice: ");
+        int choice = scanner.nextInt();
+
+        return choice;
+    }
+
+    private void addProcess(Scanner scanner) {
         // User to enter the number of processes
         System.out.print("Enter the number of processes: ");
         int numOfProcesses = scanner.nextInt();
 
-        scheduler.q1 = new PCB[numOfProcesses];
-        scheduler.q2 = new PCB[numOfProcesses];
+        q1 = new PCB[numOfProcesses];
+        q2 = new PCB[numOfProcesses];
 
         // Input process details
         for (int i = 0; i < numOfProcesses; i++) {
@@ -53,17 +92,15 @@ public class Scheduler {
 
             // Assign process to appropriate queue based on priority
             if (priority == 1) {
-                scheduler.q1[i] = new PCB("P" + (i + 1), priority, arrivalTime, burstTime);
+                q1[i] = new PCB("P" + (i + 1), priority, arrivalTime, burstTime);
             } else if (priority == 2) {
-                scheduler.q2[i] = new PCB("P" + (i + 1), priority, arrivalTime, burstTime);
+                q2[i] = new PCB("P" + (i + 1), priority, arrivalTime, burstTime);
             }
         }
-
-        // Run scheduler
-        scheduler.runScheduler();
     }
 
     private void runScheduler() {
+        // Your existing code for running the scheduler
         try {
             PrintWriter writer = new PrintWriter(new FileWriter("C:\\Users\\wejoud\\Desktop\\os\\process_report.txt"));
             StringBuilder schedulingOrder = new StringBuilder("Scheduling Order: [");
@@ -135,7 +172,8 @@ public class Scheduler {
         }
     }
 
-    private void writeProcessDetails(PrintWriter writer, PCB process) {
+
+private void writeProcessDetails(PrintWriter writer, PCB process) {
         writer.println("Process ID: " + process.processID);
         writer.println("Priority: " + process.priority);
         writer.println("Arrival Time: " + process.arrivalTime);
@@ -182,4 +220,7 @@ public class Scheduler {
         }
         return sum / q1.length;
     }
-}
+
+    }
+
+    

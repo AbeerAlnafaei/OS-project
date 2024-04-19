@@ -1,4 +1,6 @@
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 class PCB {
@@ -99,12 +101,12 @@ public class Scheduler {
         }
     }
 
+    
     private void runScheduler() {
-        // running the scheduler
         try {
-            PrintWriter writer = new PrintWriter(new FileWriter("C:\\Users\\wejoud\\Desktop\\os\\process_report.txt"));
+            PrintWriter writer = new PrintWriter(new FileWriter("Report.txt"));
             StringBuilder schedulingOrder = new StringBuilder("Scheduling Order: [");
-
+    
             // Append process IDs from q1
             for (int i = 0; i < q1.length; i++) {
                 if (q1[i] != null) {
@@ -112,7 +114,7 @@ public class Scheduler {
                     schedulingOrder.append(processID).append(" | ");
                 }
             }
-
+    
             // Append process IDs from q2
             for (int i = 0; i < q2.length; i++) {
                 if (q2[i] != null) {
@@ -124,8 +126,9 @@ public class Scheduler {
                 }
             }
             schedulingOrder.append("]");
+            System.out.println(schedulingOrder); // Print scheduling order to console
             writer.println(schedulingOrder);
-
+    
             // Generate process report for q1
             for (int i = 0; i < q1.length; i++) {
                 if (q1[i] != null) {
@@ -135,12 +138,14 @@ public class Scheduler {
                     process.turnaroundTime = process.terminationTime - process.arrivalTime;
                     process.waitingTime = process.turnaroundTime - process.burstTime;
                     process.responseTime = process.startTime - process.arrivalTime;
-
+    
+                    // Print process details to console
+                    printProcessDetails(process);
                     // Write process details to the file
                     writeProcessDetails(writer, process);
                 }
             }
-
+    
             // Generate process report for q2
             for (int i = 0; i < q2.length; i++) {
                 if (q2[i] != null) {
@@ -150,26 +155,42 @@ public class Scheduler {
                     process.turnaroundTime = process.terminationTime - process.arrivalTime;
                     process.waitingTime = 0; // SJF is non-preemptive, waiting time is always 0
                     process.responseTime = process.startTime - process.arrivalTime;
-
+    
+                    // Print process details to console
+                    printProcessDetails(process);
                     // Write process details to the file
                     writeProcessDetails(writer, process);
                 }
             }
-
+    
             // Calculate averages
             double avgTurnaroundTime = calculateAverageTurnaroundTime();
             double avgWaitingTime = calculateAverageWaitingTime(q1);
             double avgResponseTime = calculateAverageResponseTime(q1);
-
-            // Write averages
+    
+            // Write averages to the file
             writer.println("Average Turnaround Time: " + avgTurnaroundTime);
             writer.println("Average Waiting Time: " + avgWaitingTime);
             writer.println("Average Response Time: " + avgResponseTime);
-
+    
             writer.close(); // Close the file writer
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    // Method to print process details to console
+    private void printProcessDetails(PCB process) {
+        System.out.println("Process ID: " + process.processID);
+        System.out.println("Priority: " + process.priority);
+        System.out.println("Arrival Time: " + process.arrivalTime);
+        System.out.println("CPU Burst: " + process.burstTime);
+        System.out.println("Start Time: " + process.startTime);
+        System.out.println("Termination Time: " + process.terminationTime);
+        System.out.println("Turnaround Time: " + process.turnaroundTime);
+        System.out.println("Waiting Time: " + process.waitingTime);
+        System.out.println("Response Time: " + process.responseTime);
+        System.out.println();
     }
 
 

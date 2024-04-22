@@ -92,12 +92,15 @@ public class Scheduler {
             System.out.print("Burst Time: ");
             int burstTime = scanner.nextInt();
 
-            // Assign process to appropriate queue based on priority
-            if (priority == 1) {
-                q1[i] = new PCB("P" + (i + 1), priority, arrivalTime, burstTime);
-            } else if (priority == 2) {
-                q2[i] = new PCB("P" + (i + 1), priority, arrivalTime, burstTime);
-            }
+            // Q5
+        if (priority == 1) {
+            q1[i] = new PCB("P" + (i + 1), priority, arrivalTime, burstTime);
+        } else if (priority == 2) {
+            q2[i] = new PCB("P" + (i + 1), priority, arrivalTime, burstTime);
+        } else {
+            System.out.println("Invalid priority. Process not added.");
+            i--;
+        }
         }
     }
 

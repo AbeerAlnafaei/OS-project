@@ -28,7 +28,7 @@ class PCB {
 }
 
 public class Scheduler {
-    PCB[] q1;//test
+    PCB[] q1;
     PCB[] q2;
     private static int timeQuantum = 3; // Time quantum for Round-Robin
 
@@ -48,7 +48,7 @@ public class Scheduler {
 
                 case 2:
                     // Report detailed information about each process and different scheduling criteria
-                    scheduler.runScheduler();
+                    scheduler.runScheduler2();
                     break;
 
                 case 3:
@@ -81,9 +81,11 @@ public class Scheduler {
 
         q1 = new PCB[numOfProcesses];
         q2 = new PCB[numOfProcesses];
-
+        int trackQ1 =0;
+        int trackQ2 =0;
         // Input process details
         for (int i = 0; i < numOfProcesses; i++) {
+            
             System.out.println("Enter details for Process " + (i + 1) + ":");
             System.out.print("Priority (1 for high priority, 2 for low priority): ");
             int priority = scanner.nextInt();
@@ -94,18 +96,48 @@ public class Scheduler {
 
             // Q5
         if (priority == 1) {
-            q1[i] = new PCB("P" + (i + 1), priority, arrivalTime, burstTime);
+            q1[trackQ1++] = new PCB("P" + (i + 1), priority, arrivalTime, burstTime);
         } else if (priority == 2) {
-            q2[i] = new PCB("P" + (i + 1), priority, arrivalTime, burstTime);
+            q2[trackQ2++] = new PCB("P" + (i + 1), priority, arrivalTime, burstTime);
         } else {
             System.out.println("Invalid priority. Process not added.");
             i--;
         }
+        
         }
+        
+        sortByArrivalTime(q1);
+        sortByArrivalTime(q2);
+        
     }
 
+    public static PCB[] sortByArrivalTime(PCB[] array) {
+        if (array == null || array.length == 0) {
+            return array; // Return if array is null or empty
+        }
+        
+        for (int i = 0; i < array.length - 1; i++) {
+            for (int j = 0; j < array.length - i - 1; j++) {
+                // Check for null elements
+                if (array[j] == null || array[j + 1] == null) {
+                    continue; // Skip if any element is null
+                }
+                // Compare arrival times
+                if (array[j].arrivalTime > array[j + 1].arrivalTime) {
+                    // Swap elements
+                    PCB temp = array[j];
+                    array[j] = array[j + 1];
+                    array[j + 1] = temp;
+                }
+            }
+        }
+        return array;
+    }
     
-    private void runScheduler() {
+    
+
+    
+   /*  private void runScheduler() {
         try {
             PrintWriter writer = new PrintWriter(new FileWriter("Report.txt"));
             StringBuilder schedulingOrder = new StringBuilder("Scheduling Order: [");
@@ -180,7 +212,151 @@ public class Scheduler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }*/
+    int StartRun = 0 ;
+    private void runScheduler2() {
+        try {
+            PrintWriter writer = new PrintWriter(new FileWriter("Report.txt"));
+            StringBuilder schedulingOrder = new StringBuilder("Scheduling Order: [");
+            String processInfo="" ;
+
+
+        
+            if(q2[0] != null && q1[0] != null && q2[0].arrivalTime < q1[0].arrivalTime){
+                schedulingOrder.append(executeQ2(processInfo , writer ));
+            }else{
+                
+            
+
+                schedulingOrder.append(executeQ1(processInfo , writer ));
+                schedulingOrder.append(executeQ2(processInfo , writer ));}
+               
+
+            
+            schedulingOrder.append("]");
+            System.out.println(schedulingOrder); // Print scheduling order to console
+            writer.println(schedulingOrder);
+    
+ 
+            System.out.println(processInfo);
+            writer.close(); // Close the file writer
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
+    private StringBuilder executeQ2(String processesInfo, PrintWriter writer) {
+        StringBuilder schedulingOrderQ2 = new StringBuilder(""); 
+    
+        // Track the number of processes remaining in q2
+        int remainingProcesses = q2.length ;
+        int i = 0;  
+        while (remainingProcesses > 0 && !this.isEmpty(q2)) {
+            if (q2[i] != null) {
+                PCB shortestBurst = q2[i];
+                boolean check = true;
+                for (int j = i + 1; j < q2.length; j++) {
+                    if (q2[j] != null &&q2[j].arrivalTime <= StartRun && q2[j].burstTime < shortestBurst.burstTime ) {
+                        shortestBurst = q2[j];
+                        check = false;
+                    }
+                }
+                // now we decide process with the shortest burst time 
+                schedulingOrderQ2.append(shortestBurst.processID);
+                StartRun+=shortestBurst.burstTime;
+                //
+               if (remainingProcesses > 1 || !isEmpty(q1)) {
+                    schedulingOrderQ2.append(" | CS | ");
+                    StartRun += 2; // Assuming a context switch takes 2 units of time
+                    }
+    
+                //before doing shift for process that will remove it, we will Print process details to console
+                processesInfo = generateProcessDetails(shortestBurst, processesInfo);
+    
+                // Write process details to the file
+                writeProcessDetails(writer, shortestBurst);
+    
+                q2 = removeProcess(q2, shortestBurst);
+                remainingProcesses--;
+    
+                if (!isEmpty(q1)) {
+                    //calling execute q1 method 
+                    schedulingOrderQ2.append(executeQ1(processesInfo, writer)); // Append the result of executeQ1
+                }
+    
+                if (check)
+                    i++;
+            }
+            else {
+                // Increment i if q2[i] is null
+                i++;
+            }
+        }
+    
+        return schedulingOrderQ2;    
+    }
+    
+        
+         private StringBuilder executeQ1( String processesInfo , PrintWriter writer  ){
+             
+                StringBuilder schedulingOrder = new StringBuilder("");
+                
+     
+                for (int i = 0; i < q1.length; i++) {
+                    if (q1[i] != null) {
+                        String processID = q1[i].processID;
+                        schedulingOrder.append(processID).append(" | ");
+                        //before doing shift for process that will remove it , we will Print process details to console
+                        processesInfo = generateProcessDetails( q1[i] , processesInfo);
+                        // Write process details to the file
+                        writeProcessDetails(writer, q1[i]);
+                        q1 = removeProcess(q1 , q1[i]);
+                    }
+                }
+                return schedulingOrder;
+             
+         }
+        
+        // Helper method to check if an array of PCBs is empty
+    private boolean isEmpty(PCB[] queue) {
+        for (PCB process : queue) {
+            if (process != null) {
+                return false; // Queue is not empty
+            }
+        }
+        return true; // Queue is empty
+    }
+    
+    // Helper method to remove a process from an array of PCBs
+    private PCB[] removeProcess(PCB[] queue, PCB processToRemove) {
+        for (int i = 0; i < queue.length; i++) {
+            if(queue[i] != null )
+            if (queue[i].processID == processToRemove.processID) {
+                queue[i] = null; // Remove process
+                break;
+            }
+        }
+        return queue;
+    }
+
+    // Method to generate process details as a string
+private String generateProcessDetails(PCB process, String additionalDetails) {
+    StringBuilder details = new StringBuilder();
+    
+    details.append(additionalDetails).append("\n\n");
+    details.append("Process ID: ").append(process.processID).append("\n");
+    details.append("Priority: ").append(process.priority).append("\n");
+    details.append("Arrival Time: ").append(process.arrivalTime).append("\n");
+    details.append("CPU Burst: ").append(process.burstTime).append("\n");
+    details.append("Start Time: ").append(process.startTime).append("\n");
+    details.append("Termination Time: ").append(process.terminationTime).append("\n");
+    details.append("Turnaround Time: ").append(process.turnaroundTime).append("\n");
+    details.append("Waiting Time: ").append(process.waitingTime).append("\n");
+    details.append("Response Time: ").append(process.responseTime).append("\n");
+    
+    return details.toString();
+}
     
     // Method to print process details to console
     private void printProcessDetails(PCB process) {
@@ -246,5 +422,6 @@ private void writeProcessDetails(PrintWriter writer, PCB process) {
     }
 
     }
+
 
     

@@ -532,7 +532,7 @@ public class Scheduler {
             return;
         }
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter("/Users/saran/Report.txt"))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("Report.txt"))) {
             StringBuilder schedulingOrder = new StringBuilder();
             schedulingOrder.append(executeRoundRobin(q1, writer));
             schedulingOrder.append(executeSJF(q2, writer));
@@ -655,8 +655,14 @@ public class Scheduler {
 
                 completedProcesses++; // Increment the count of completed processes
                 processExecuted = true;
+                if (q1.length != 0 ) {
+                    //calling execute q1 method 
+                    schedulingOrder.append(executeRoundRobin(q1, writer)); // Append the result of executeQ1
+                }
                 break;  // Break after scheduling one process per iteration
             }
+
+
         }
 
         if (!processExecuted) { // If no process was executed, increment current time

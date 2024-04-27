@@ -621,6 +621,9 @@ private void writeProcessDetails(PrintWriter writer, PCB process) {
                         process.waitingTime = process.turnaroundTime - process.burstTime;
                         writer.printf("Process ID: %s, Start Time: %d, Termination Time: %d, Turnaround Time: %d, Waiting Time: %d, Response Time: %d%n",
                                       process.processID, process.startTime, process.terminationTime, process.turnaroundTime, process.waitingTime, process.responseTime);
+                                      System.out.printf("Process ID: %s, Start Time: %d, Termination Time: %d, Turnaround Time: %d, Waiting Time: %d, Response Time: %d%n",
+                                      process.processID, process.startTime, process.terminationTime, process.turnaroundTime, process.waitingTime, process.responseTime);
+                                     
                         // Remove process if burst time is 0
                         for (int j = i; j < queue.length - 1; j++) {
                             queue[j] = queue[j + 1];

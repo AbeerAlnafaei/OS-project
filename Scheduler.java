@@ -534,8 +534,11 @@ public class Scheduler {
 
         try (PrintWriter writer = new PrintWriter(new FileWriter("Report.txt"))) {
             StringBuilder schedulingOrder = new StringBuilder();
+            if(q2[0] != null && q1[0] != null && q2[0].arrivalTime < q1[0].arrivalTime){
+                schedulingOrder.append(executeSJF(q2, writer));
+            }else{
             schedulingOrder.append(executeRoundRobin(q1, writer));
-            schedulingOrder.append(executeSJF(q2, writer));
+            schedulingOrder.append(executeSJF(q2, writer));}
             writer.println("Scheduling Order: " + schedulingOrder);
             System.out.println("Scheduling Order: " + schedulingOrder);
 

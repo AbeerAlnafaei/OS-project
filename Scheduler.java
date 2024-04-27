@@ -598,38 +598,56 @@ private void writeProcessDetails(PrintWriter writer, PCB process) {
      }
  
      private String executeRoundRobin(PCB[] queue, PrintWriter writer) {
-         StringBuilder schedulingOrder = new StringBuilder();
-         boolean processesRemaining;
-         do {
-             processesRemaining = false;
-             for (PCB process : queue) {
-                 if (process != null && process.remainingBurst > 0 && process.arrivalTime <= currentTime) {
-                     if (process.startTime == -1) {
-                         process.startTime = Math.max(currentTime, process.arrivalTime);
-                         process.responseTime = process.startTime - process.arrivalTime;
-                     }
-                     int timeSlice = Math.min(process.remainingBurst, timeQuantum);
-                     schedulingOrder.append(process.processID).append(" | ");
-                     currentTime += timeSlice;
-                     process.remainingBurst -= timeSlice;
- 
-                     if (process.remainingBurst <= 0) {
-                         process.terminationTime = currentTime;
-                         process.turnaroundTime = process.terminationTime - process.arrivalTime;
-                         process.waitingTime = process.turnaroundTime - process.burstTime;
-                         writer.printf("Process ID: %s, Start Time: %d, Termination Time: %d, Turnaround Time: %d, Waiting Time: %d, Response Time: %d%n",
-                                       process.processID, process.startTime, process.terminationTime, process.turnaroundTime, process.waitingTime, process.responseTime);
-                                       System.out.printf("Process ID: %s, Start Time: %d, Termination Time: %d, Turnaround Time: %d, Waiting Time: %d, Response Time: %d%n",
-                                       process.processID, process.startTime, process.terminationTime, process.turnaroundTime, process.waitingTime, process.responseTime);
-                  
-                     } else {
-                         processesRemaining = true;
-                     }
-                 }
-             }
-         } while (processesRemaining);
-         return schedulingOrder.toString();
-     }
+        StringBuilder schedulingOrder = new StringBuilder();
+        boolean processesRemaining;
+        do {
+            processesRemaining = false;
+            
+            for (int i = 0; i < queue.length; i++) {
+                PCB process = queue[i];
+                if (process != null && process.remainingBurst > 0 && process.arrivalTime <= currentTime) {
+                    if (process.startTime == -1) {
+                        process.startTime = Math.max(currentTime, process.arrivalTime);
+                        process.responseTime = process.startTime - process.arrivalTime;
+                    }
+                    int timeSlice = Math.min(process.remainingBurst, timeQuantum);
+                    schedulingOrder.append(process.processID).append(" | ");
+                    currentTime += timeSlice;
+                    process.remainingBurst -= timeSlice;
+    
+                    if (process.remainingBurst <= 0) {
+                        process.terminationTime = currentTime;
+                        process.turnaroundTime = process.terminationTime - process.arrivalTime;
+                        process.waitingTime = process.turnaroundTime - process.burstTime;
+                        writer.printf("Process ID: %s, Start Time: %d, Termination Time: %d, Turnaround Time: %d, Waiting Time: %d, Response Time: %d%n",
+                                      process.processID, process.startTime, process.terminationTime, process.turnaroundTime, process.waitingTime, process.responseTime);
+                        // Remove process if burst time is 0
+                        for (int j = i; j < queue.length - 1; j++) {
+                            queue[j] = queue[j + 1];
+                        }
+                        queue[queue.length - 1] = null;
+                        i--; // Decrement i as we shifted the array elements
+                    } else {
+                        processesRemaining = true;
+                        // Shift the process based on the condition
+                        int j;
+                        
+                        for (j = i; j < queue.length - 1 && queue[j + 1] != null; j++) {
+                            if (queue[j + 1].arrivalTime <= currentTime ) {
+                                queue[j] = queue[j + 1];
+                            } else {
+                                break;
+                            }
+                        }
+                        queue[j] = process;
+                        i--; // Decrement i as we shifted the array elements
+                    }
+                }
+            }
+        } while (processesRemaining);
+        return schedulingOrder.toString();
+    }
+    
      private String executeSJF(PCB[] queue, PrintWriter writer) {
      StringBuilder schedulingOrder = new StringBuilder();
      int totalProcesses = queue.length;

@@ -427,6 +427,12 @@ private void writeProcessDetails(PrintWriter writer, PCB process) {
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ */
+
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -615,28 +621,55 @@ public class Scheduler {
         } while (processesRemaining);
         return schedulingOrder.toString();
     }
-
     private String executeSJF(PCB[] queue, PrintWriter writer) {
-        StringBuilder schedulingOrder = new StringBuilder();
-        Arrays.sort(queue, Comparator.comparingInt(p -> p.burstTime)); // Sort by burst time for SJF
-        
-        for (PCB process : queue) {
-            if (process != null && process.arrivalTime <= currentTime) {
+    StringBuilder schedulingOrder = new StringBuilder();
+    int totalProcesses = queue.length;
+    int completedProcesses = 0;
+    boolean processExecuted;
+
+    // Sort the queue initially by burst time to prepare for SJF
+    Arrays.sort(queue, Comparator.comparingInt(p -> p.burstTime));
+
+    while (completedProcesses < totalProcesses) {
+        processExecuted = false;
+
+        // Find the shortest job that can start given the current time
+        for (int i = 0; i < queue.length; i++) {
+            PCB process = queue[i];
+            if (process != null && process.remainingBurst > 0 && process.arrivalTime <= currentTime) {
                 if (process.startTime == -1) {
-                    process.startTime = Math.max(currentTime, process.arrivalTime);
+                    process.startTime = currentTime;  // Set start time the first time it runs
                     process.responseTime = process.startTime - process.arrivalTime;
                 }
+
+                // Execute the process
+                schedulingOrder.append(process.processID).append(" | ");
                 currentTime += process.burstTime;
                 process.terminationTime = currentTime;
-                process.turnaroundTime = currentTime - process.arrivalTime;
+                process.turnaroundTime = process.terminationTime - process.arrivalTime;
                 process.waitingTime = process.turnaroundTime - process.burstTime;
+                process.remainingBurst = 0; // Mark as completed
 
-                schedulingOrder.append(process.processID).append(" | ");
                 writer.printf("Process ID: %s, Start Time: %d, Termination Time: %d, Turnaround Time: %d, Waiting Time: %d, Response Time: %d%n",
                               process.processID, process.startTime, process.terminationTime, process.turnaroundTime, process.waitingTime, process.responseTime);
+
+                completedProcesses++; // Increment the count of completed processes
+                processExecuted = true;
+                break;  // Break after scheduling one process per iteration
             }
         }
-        return schedulingOrder.toString();
+
+        if (!processExecuted) { // If no process was executed, increment current time
+            currentTime++;
+        }
     }
+
+    if (schedulingOrder.length() > 3) {
+        schedulingOrder.setLength(schedulingOrder.length() - 3); // Remove the last " | "
+    }
+
+    return schedulingOrder.toString();
 }
+}
+
 
